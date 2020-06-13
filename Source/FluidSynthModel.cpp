@@ -64,12 +64,7 @@ void FluidSynthModel::initialise() {
     const char *DRV[] {NULL};
     fluid_audio_driver_register(DRV);
     
-    settings = { new_fluid_settings(), delete_fluid_settings };
-    
-    // https://sourceforge.net/p/fluidsynth/wiki/FluidSettings/
-#if JUCE_DEBUG
-    fluid_settings_setint(settings.get(), "synth.verbose", 1);
-#endif
+    settings = getSettings();
 
     synth = { new_fluid_synth(settings.get()), delete_fluid_synth };
     fluid_synth_set_sample_rate(synth.get(), currentSampleRate);
@@ -251,6 +246,21 @@ void FluidSynthModel::loadFont(const String &absPath) {
     }
     // refresh regardless of success, if only to clear the table
     refreshBanks();
+}
+
+unique_ptr<fluid_settings_t, decltype(&delete_fluid_settings)> FluidSynthModel::getSettings()
+{
+    fluid_settings_t* newSettings = new_fluid_settings();
+
+    // https://sourceforge.net/p/fluidsynth/wiki/FluidSettings/
+#if JUCE_DEBUG
+    fluid_settings_setint(newSettings, "synth.verbose", 1);
+#endif
+
+    //Dynamic sample loading
+    fluid_settings_setint(newSettings, "synth.dynamic-sample-loading", 1);
+
+    return { newSettings, delete_fluid_settings };
 }
 
 void FluidSynthModel::refreshBanks() {

@@ -61,6 +61,8 @@ private:
     static const map<fluid_midi_control_change, String> controllerToParam;
     static const map<String, fluid_midi_control_change> paramToController;
 
+    unique_ptr<fluid_settings_t, decltype(&delete_fluid_settings)> getSettings();
+
     void refreshBanks();
 
     AudioProcessorValueTreeState& valueTreeState;
